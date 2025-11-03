@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Python + Web Review Game</title>
+  <style>
+    :root{
+      --bg:#f8fafc; /* light slate-50 */
+      --card:#ffffff; /* white */
+      --muted:#475569; /* slate-600 */
+      --text:#0f172a; /* slate-900 */
+      --accent:#10b981; /* emerald-500 */
+      --good:#16a34a; /* green-600 */
+      --bad:#dc2626; /* red-600 */
+      --warn:#d97706; /* amber-600 */
+    }
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#ffffff, var(--bg));font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";color:var(--text);} 
+    .app{max-width:950px;margin:24px auto 40px;padding:16px}
+    .card{background:linear-gradient(180deg,#ffffff,#ffffff 40%, var(--card)); border:1px solid rgba(2,6,23,.08);box-shadow:0 10px 30px rgba(2,6,23,.08);border-radius:20px;padding:24px} 
+    h1{margin:0 0 8px;font-size:28px;letter-spacing:.3px}
+    .muted{color:var(--muted)}
+    .grid{display:grid;gap:16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    input[type="text"], select{
+      background:#f1f5f9;border:1px solid rgba(2,6,23,.12);color:var(--text);
+      padding:10px 12px;border-radius:12px;outline:none;font-size:15px;min-width:240px
+    }
+    button{appearance:none;border:none;background:var(--accent);color:#001018;font-weight:700;
+      padding:10px 14px;border-radius:12px;font-size:15px;cursor:pointer;transition:transform .04s ease, filter .2s ease}
+    button:hover{filter:brightness(1.05)}
+    button:active{transform:translateY(1px)}
+    .btn-secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.18)}
+    .btn-ghost{background:transparent;color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:rgba(56,189,248,.12);color:#93c5fd;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid rgba(56,189,248,.25)}
+    .question{font-size:20px;line-height:1.35}
+    .choices{display:grid;gap:10px;margin-top:14px}
+    .choice{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:1px solid rgba(2,6,23,.12);padding:12px 14px;border-radius:14px;cursor:pointer;transition:background .15s ease, border-color .2s ease} 
+    .choice:hover{background:#eef2f7;border-color:rgba(2,6,23,.2)}
+    .choice.disabled{cursor:not-allowed;opacity:.85}
+    .choice .letter{flex:0 0 auto;width:28px;height:28px;border-radius:8px;background:rgba(148,163,184,.15);display:grid;place-items:center;font-weight:700;color:#cbd5e1}
+    .choice.correct{border-color:rgba(34,197,94,.6);background:rgba(34,197,94,.08)}
+    .choice.incorrect{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.08)}
+    .explain{margin-top:10px;font-size:14px;color:#0f172a;background:#f8fafc;border:1px dashed rgba(2,6,23,.18);padding:12px;border-radius:12px} 
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px;flex-wrap:wrap}
+    .progress{height:10px;background:#e2e8f0;border-radius:999px;border:1px solid rgba(2,6,23,.08);overflow:hidden} 
+    .bar{height:100%;background:linear-gradient(90deg,#34d399,#10b981,#0ea5e9);width:0%} 
+    .tag{font-size:12px;color:#67e8f9;background:rgba(103,232,249,.12);border:1px solid rgba(103,232,249,.25);padding:4px 8px;border-radius:999px}
+    .stats{display:flex;gap:10px;flex-wrap:wrap}
+    .stat{background:#0b1220;border:1px solid rgba(255,255,255,.08);padding:8px 10px;border-radius:10px;font-size:13px}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#0b1220;border:1px solid rgba(255,255,255,.15);padding:2px 6px;border-radius:6px}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace}
+    .hidden{display:none}
+    .center{display:grid;place-items:center}
+    .divider{height:1px;background:linear-gradient(90deg,transparent, rgba(255,255,255,.15), transparent);margin:18px 0}
+    .small{font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card" id="screen-intro">
+      <h1>🐍 Python + Web Review Game</h1>
+      <p class="muted">Interactive practice on: <span class="pill">variables</span> <span class="pill">input</span> <span class="pill">if / else</span> <span class="pill">operators</span> <span class="pill">for / while</span> <span class="pill">concatenation</span> <span class="pill">data types</span> <span class="pill">HTML</span> <span class="pill">CSS</span> <span class="pill">tables</span> <span class="pill">paragraphs</span> <span class="pill">images</span> <span class="pill">links</span></p>
+      <div class="divider"></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start">
+        <div class="grid">
+          <label class="muted small">Student name</label>
+          <input id="studentName" type="text" placeholder="e.g., Jordan Lee"/>
+        </div>
+        <div class="grid">
+          <label class="muted small">Class / Period</label>
+          <input id="classPeriod" type="text" placeholder="e.g., Period 3"/>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px; gap:16px; flex-wrap:wrap">
+        <div class="grid">
+          <label class="muted small">Question set</label>
+          <select id="questionCount">
+            <option value="10">10 questions</option>
+            <option value="15" selected>15 questions</option>
+            <option value="20">20 questions</option>
+            <option value="all">All questions</option>
+          </select>
+        </div>
+        <div class="grid">
+          <label class="muted small">Difficulty</label>
+          <select id="difficulty">
+            <option value="all" selected>All</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="grid">
+          <label class="muted small">Category</label>
+          <select id="category">
+            <option value="all" selected>All Topics</option>
+            <option value="python">Python Only</option>
+            <option value="web">Web (HTML/CSS) Only</option>
+          </select>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="row">
+        <button id="btnStart">Start Game</button>
+        <button id="btnPreview" class="btn-secondary">Preview Questions</button>
+      </div>
+      <p class="small muted" style="margin-top:10px">Tip: You can <span class="kbd">Download CSV</span> after finishing and submit it in Canvas.</p>
+    </div>
+
+    <div class="card hidden" id="screen-game">
+      <div class="footer">
+        <div class="stats">
+          <div class="stat">Name: <span id="rName" class="mono"></span></div>
+          <div class="stat">Period: <span id="rPeriod" class="mono"></span></div>
+          <div class="stat">Correct: <span id="rScore" class="mono"></span></div>
+          <div class="stat">Points: <span id="rPoints" class="mono"></span></div>
+          <div class="stat">Percent: <span id="rPercent" class="mono"></span></div>
+        </div>
+        <div class="row">
+          <button id="btnNext" class="btn-secondary">Next</button>
+          <button id="btnSkip" class="btn-ghost">Skip</button>
+        </div>
+        <div class="row">
+          <button id="btnEnd" class="btn-secondary">End Now</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="screen-end">
+      <h1>Results</h1>
+      <div class="row" style="align-items:center;justify-content:space-between">
+        <div class="stats">
+          <div class="stat">Name: <span id="rName" class="mono"></span></div>
+          <div class="stat">Period: <span id="rPeriod" class="mono"></span></div>
+          <div class="stat">Score: <span id="rScore" class="mono"></span></div>
+          <div class="stat">Percent: <span id="rPercent" class="mono"></span></div>
+        </div>
+        <div class="row">
+          <button id="btnRetry">Play Again</button>
+          <button id="btnDownload" class="btn-secondary">Download CSV</button>
+          <button id="btnReview" class="btn-ghost">Review Answers</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div id="missedContainer"></div>
+    </div>
+
+    <div class="card hidden" id="screen-preview">
+      <h1>Question Bank Preview</h1>
+      <p class="muted small">This shows every question currently in the bank. (Students won’t see this in game mode.)</p>
+      <div id="previewList" class="grid"></div>
+      <div class="row" style="margin-top:12px">
+        <button id="btnBackHome" class="btn-secondary">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Utilities ----------
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    function shuffle(arr){
+      for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]]
+      }
+      return arr
+    }
+    function html(strings,...vals){
+      return strings.reduce((acc, s, i) => acc + s + (vals[i] ?? ''), '')
+    }
+
+    // ---------- Question Bank ----------
+    /**
+     * Each question has:
+     * id, topic, type: 'mc',
+     * prompt (HTML ok), choices: [strings], answer: index,
+     * explanation: string
+     */
+    const BANK = [
+      // VARIABLES
+      {id:'var1', topic:'variables', type:'mc', prompt:`What does this code print?<br><span class="mono">x = 5\ny = x\nx = x + 2\nprint(y)</span>`, choices:['5','7','None','Error'], answer:0, explanation:'y gets the original value of x (5). Changing x later does not change y.'},
+      {id:'var2', topic:'variables', type:'mc', prompt:`Which is a valid variable name in Python?`, choices:['2items','first-name','user_name','class'], answer:2, explanation:'Valid identifiers start with a letter/underscore and use letters, digits, and underscores. Also avoid reserved keywords like class.'},
+
+      // INPUT + CONCATENATION
+      {id:'inp1', topic:'input', type:'mc', prompt:`If the user types <span class="mono">Alex</span>, what prints?<br><span class="mono">name = input("Name: ")\nprint("Hello, " + name)</span>`, choices:['Hello, Alex','"Hello, " + name','Hello, "name"','Error'], answer:0, explanation:'input() returns a string; concatenation with + builds the final string.'},
+      {id:'con1', topic:'concatenation', type:'mc', prompt:`What is the result of:<br><span class="mono">"3" + "4"</span>?`, choices:['7','34','Error','12'], answer:1, explanation:'String concatenation joins strings end-to-end: "3" + "4" becomes "34".'},
+      {id:'con2', topic:'concatenation', type:'mc', prompt:`Which fixes this error?<br><span class="mono">age = 14\nprint("Age: " + age)</span>`, choices:['Use <span class="mono">print("Age: " + str(age))</span>','Use <span class="mono">int(age)</span>','It already works','Use <span class="mono">age = "14"</span> only'], answer:0, explanation:'You must convert the integer to a string for concatenation. <span class="mono">str(age)</span> is correct.'},
+      {id:'inp2', topic:'input', type:'mc', prompt:`To read a number from input and store it as an integer:`, choices:[
+        '<span class="mono">x = input()</span>',
+        '<span class="mono">x = int(input())</span>',
+        '<span class="mono">x = str(input())</span>',
+        '<span class="mono">input(int)</span>'
+      ], answer:1, explanation:'Wrap input() with int(...) to convert the string to an integer.'},
+
+      // IF STATEMENTS
+      {id:'if1', topic:'if', type:'mc', prompt:`What prints?<br><span class="mono">x = 10\nif x &gt; 10:\n    print("A")\nelif x == 10:\n    print("B")\nelse:\n    print("C")</span>`, choices:['A','B','C','Nothing'], answer:1, explanation:'x equals 10 so the <span class="mono">elif x == 10</span> branch runs.'},
+      {id:'if2', topic:'if', type:'mc', prompt:`Choose the correct operator for: <em>run block only when x is not equal to y</em>.`, choices:['<span class="mono">x =! y</span>','<span class="mono">x != y</span>','<span class="mono">x &lt;&gt; y</span>','<span class="mono">x not= y</span>'], answer:1, explanation:'Inequality in Python uses <span class="mono">!=</span>.'},
+      {id:'if3', topic:'if', type:'mc', prompt:`Fill in the blank: Only one branch runs in an <span class="mono">if / elif / else</span> chain.`, choices:['True','False'], answer:0, explanation:'Python picks the first condition that is true and skips the rest.'},
+
+      // LOOPS: FOR + WHILE
+      {id:'for1', topic:'for', type:'mc', prompt:`How many times does this run?<br><span class="mono">for i in range(3):\n    print(i)</span>`, choices:['1','2','3','4'], answer:2, explanation:'<span class="mono">range(3)</span> produces 0,1,2 → three iterations.'},
+      {id:'for2', topic:'for', type:'mc', prompt:`What prints?<br><span class="mono">total = 0\nfor n in [2, 4, 6]:\n    total += n\nprint(total)</span>`, choices:['6','8','10','12'], answer:3, explanation:'2+4+6 = 12.'},
+      {id:'while1', topic:'while', type:'mc', prompt:`Which <em>terminates</em> the loop?<br><span class="mono">while True:\n    x = input()\n    if x == "quit":\n        ____</span>`, choices:['<span class="mono">end</span>','<span class="mono">break</span>','<span class="mono">continue</span>','<span class="mono">stop</span>'], answer:1, explanation:'<span class="mono">break</span> exits the loop immediately.'},
+      {id:'while2', topic:'while', type:'mc', prompt:`What is a common danger with <span class="mono">while</span> loops?`, choices:['They cannot iterate lists','They always run once','Infinite loops if the condition never becomes False','They can’t use <span class="mono">break</span>'], answer:2, explanation:'If you don’t change state to make the condition False, the loop can run forever.'},
+
+      // OPERATORS
+      {id:'op1', topic:'operators', type:'mc', prompt:`What is the value of <span class="mono">7 // 2</span>?`, choices:['3','3.5','4','Error'], answer:0, explanation:'<span class="mono">//</span> is floor division → 3.'},
+      {id:'op2', topic:'operators', type:'mc', prompt:`What is the value of <span class="mono">2 ** 3 ** 2</span>?`, choices:['64','512','256','16'], answer:1, explanation:'Exponentiation is right-associative: 3**2 = 9, then 2**9 = 512.'},
+      {id:'op3', topic:'operators', type:'mc', prompt:`Which expression is <em>True</em>?`, choices:[
+        '<span class="mono">3 &lt; 2 and 5 &gt; 1</span>',
+        '<span class="mono">(3 &lt; 2) or (5 &gt; 10)</span>',
+        '<span class="mono">not (4 == 4)</span>',
+        '<span class="mono">(10 % 2 == 0) and (3 != 4)</span>'
+      ], answer:3, explanation:'10 % 2 == 0 (True) and 3 != 4 (True) → True and True is True.'},
+
+      // DATA TYPES
+      {id:'type1', topic:'types', type:'mc', prompt:`What is the type of <span class="mono">True</span>?`, choices:['string','int','bool','float'], answer:2, explanation:'<span class="mono">True</span> and <span class="mono">False</span> are booleans.'},
+      {id:'type2', topic:'types', type:'mc', prompt:`What does <span class="mono">type(3.0)</span> return?`, choices:['<span class="mono">&lt;class \"int\"&gt;</span>','<span class="mono">&lt;class \"float\"&gt;</span>','<span class="mono">&lt;class \"str\"&gt;</span>','3.0'], answer:1, explanation:'A number with a decimal point is a float.'},
+      {id:'type3', topic:'types', type:'mc', prompt:`Choose the statement that is <em>True</em>.`, choices:[
+        'Integers can be concatenated directly with strings using <span class="mono">+</span>.',
+        'Floats and ints are both numeric types in Python.',
+        'Booleans cannot be used in <span class="mono">if</span> conditions.',
+        'Strings are immutable and numbers are mutable.'
+      ], answer:1, explanation:'Both int and float are numeric. (Also: strings are immutable; numbers are immutable too.)'},
+
+      // MIXED
+      {id:'mix1', topic:'mixed', type:'mc', prompt:`What prints?<br><span class="mono">x = 3\nif x % 2 == 1:\n    print("odd")\nelse:\n    print("even")</span>`, choices:['odd','even','True','Error'], answer:0, explanation:'3 % 2 == 1 so the if condition is True.'},
+      {id:'mix2', topic:'mixed', type:'mc', prompt:`Which produces <span class="mono">0 1 2</span> on one line separated by spaces?`, choices:[
+        '<span class="mono">for i in range(3):\n    print(i, end=" ")</span>',
+        '<span class="mono">for i in range(3):\n    print(i)</span>',
+        '<span class="mono">while i &lt; 3:\n    print(i)</span>',
+        '<span class="mono">print(range(3))</span>'
+      ], answer:0, explanation:'Using <span class="mono">end=" "</span> keeps prints on one line with spaces.'},
+      {id:'mix3', topic:'mixed', type:'mc', prompt:`After this code, what is <span class="mono">msg</span>?<br><span class="mono">a = 2\nb = 5\nmsg = "Ans: " + str(a * b)</span>`, choices:['"Ans: 10"','"Ans: a * b"','"Ans: 7"','Error'], answer:0, explanation:'a*b is 10; converted to string and concatenated.'},
+      {id:'mix4', topic:'mixed', type:'mc', prompt:`What prints?<br><span class="mono">count = 0\nwhile count &lt; 3:\n    count += 1\nprint(count)</span>`, choices:['0','1','2','3'], answer:3, explanation:'count increases to 3; loop stops when condition is False, then prints 3.'} ,
+      // HTML BASICS
+      {id:'html_p1', topic:'html', type:'mc', prompt:`Which tag creates a paragraph in HTML?`, choices:['<code>&lt;para&gt;</code>','<code>&lt;p&gt;</code>','<code>&lt;paragraph&gt;</code>','<code>&lt;text&gt;</code>'], answer:1, explanation:'Paragraphs use <code>&lt;p&gt;</code> ... <code>&lt;/p&gt;</code>.'},
+      {id:'html_p2', topic:'html', type:'mc', prompt:`Which is valid HTML for two paragraphs?`, choices:[
+        '<code>&lt;p&gt;Hello&lt;/p&gt; &lt;p&gt;World&lt;/p&gt;</code>',
+        '<code>&lt;p&gt;Hello&lt;p&gt;World&lt;/p&gt;</code>',
+        '<code>&lt;paragraph&gt;Hello&lt;/paragraph&gt;&lt;paragraph&gt;World&lt;/paragraph&gt;</code>',
+        '<code>Hello&lt;br&gt;World</code>'
+      ], answer:0, explanation:'Each paragraph should have its own <code>&lt;p&gt;...&lt;/p&gt;</code>.'},
+
+      // IMAGES
+      {id:'html_img1', topic:'images', type:'mc', prompt:`What attribute sets the image file for an <code>&lt;img&gt;</code> tag?`, choices:['href','src','alt','file'], answer:1, explanation:'Use <code>src</code> for the image URL and <code>alt</code> for alternative text.'},
+      {id:'html_img2', topic:'images', type:'mc', prompt:`Which is the best accessible image tag?`, choices:[
+        '<code>&lt;img src="dog.jpg"&gt;</code>',
+        '<code>&lt;img href="dog.jpg"&gt;</code>',
+        '<code>&lt;img src="dog.jpg" alt="Golden retriever playing"&gt;</code>',
+        '<code>&lt;image src="dog.jpg" text="dog"&gt;</code>'
+      ], answer:2, explanation:'Provide descriptive <code>alt</code> text for accessibility.'},
+
+      // LINKS
+      {id:'html_a1', topic:'links', type:'mc', prompt:`Which creates a clickable link to https://example.com with the text \'Visit\'?`, choices:[
+        '<code>&lt;link href="https://example.com"&gt;Visit&lt;/link&gt;</code>',
+        '<code>&lt;a url="https://example.com"&gt;Visit&lt;/a&gt;</code>',
+        '<code>&lt;a href="https://example.com"&gt;Visit&lt;/a&gt;</code>',
+        '<code>&lt;a src="https://example.com"&gt;Visit&lt;/a&gt;</code>'
+      ], answer:2, explanation:'Use <code>&lt;a href="..."&gt;...&lt;/a&gt;</code> for hyperlinks.'},
+      {id:'html_a2', topic:'links', type:'mc', prompt:`What does <code>target="_blank"</code> do on a link?`, choices:['Opens in a new tab/window','Downloads the file','Adds an underline','Blocks the link'], answer:0, explanation:'<code>target="_blank"</code> opens the link in a new browsing context (often a new tab).'},
+
+      // TABLES
+      {id:'html_table1', topic:'tables', type:'mc', prompt:`Which set of tags defines a basic HTML table with headers and rows?`, choices:[
+        '<code>&lt;table&gt;&lt;row&gt;&lt;cell&gt;...&lt;/cell&gt;&lt;/row&gt;&lt;/table&gt;</code>',
+        '<code>&lt;table&gt;&lt;tr&gt;&lt;th&gt;...&lt;/th&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;...&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</code>',
+        '<code>&lt;tab&gt;&lt;tr&gt;&lt;td&gt;...&lt;/td&gt;&lt;/tr&gt;&lt;/tab&gt;</code>',
+        '<code>&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;td&gt;...&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;/table&gt;</code>'
+      ], answer:1, explanation:'Use <code>&lt;table&gt;</code>, rows <code>&lt;tr&gt;</code>, header cells <code>&lt;th&gt;</code>, and data cells <code>&lt;td&gt;</code>.'},
+      {id:'html_table2', topic:'tables', type:'mc', prompt:`Which tag groups header rows in a table?`, choices:['<code>&lt;tbody&gt;</code>','<code>&lt;thead&gt;</code>','<code>&lt;tfoot&gt;</code>','<code>&lt;head&gt;</code>'], answer:1, explanation:'<code>&lt;thead&gt;</code> groups table header rows; data rows usually go in <code>&lt;tbody&gt;</code>.'},
+
+      // CSS BASICS
+      {id:'css_sel1', topic:'css', type:'mc', prompt:`Which CSS selector targets all elements with class <code>btn</code>?`, choices:['<code>#btn</code>','<code>.btn</code>','<code>btn</code>','<code>*btn</code>'], answer:1, explanation:'A dot selects by class: <code>.btn</code>.'},
+      {id:'css_sel2', topic:'css', type:'mc', prompt:`Which selector targets the element with id \'main\'?`, choices:['<code>.main</code>','<code>main</code>','<code>#main</code>','<code>*main</code>'], answer:2, explanation:'A hash selects by id: <code>#main</code>.'},
+      {id:'css_link1', topic:'css', type:'mc', prompt:`How do you link an external stylesheet named <code>styles.css</code> in HTML?`, choices:[
+        '<code>&lt;style src="styles.css"&gt;&lt;/style&gt;</code>',
+        '<code>&lt;link rel="stylesheet" href="styles.css"&gt;</code>',
+        '<code>&lt;script href="styles.css"&gt;&lt;/script&gt;</code>',
+        '<code>&lt;css href="styles.css"&gt;</code>'
+      ], answer:1, explanation:'Use the <code>&lt;link rel="stylesheet" href="..."&gt;</code> element in the <code>&lt;head&gt;</code>.'},
+      {id:'css_rule1', topic:'css', type:'mc', prompt:`Which is a valid CSS rule to make all paragraphs blue?`, choices:[
+        '<code>p { color: blue; }</code>',
+        '<code>p: color = blue;</code>',
+        '<code>p(color=blue)</code>',
+        '<code>&lt;p style="color: blue"&gt;</code>'
+      ], answer:0, explanation:'CSS uses <code>selector { property: value; }</code> syntax.'},
+      {id:'css_box1', topic:'css', type:'mc', prompt:`In the CSS box model, which property adds space <em>inside</em> the element around its content?`, choices:['margin','padding','border','gap'], answer:1, explanation:'Padding is the space between content and border; margin is outside the border.'},
+      {id:'css_disp1', topic:'css', type:'mc', prompt:`By default, <code>&lt;p&gt;</code> elements are:`, choices:['inline','block','inline-block','flex'], answer:1, explanation:'Paragraphs are block-level elements by default.'},
+      {id:'css_color1', topic:'css', type:'mc', prompt:`Which is a valid CSS color value?`, choices:['<code>color: #1a2b3c;</code>','<code>color: rgb(255,0);</code>','<code>color: 300blue;</code>','<code>color: hrg(0,0%,0%);</code>'], answer:0, explanation:'Valid examples include hex <code>#1a2b3c</code>, <code>rgb(…)</code> with three values, and named colors.'},
+      {id:'css_units1', topic:'css', type:'mc', prompt:`Which CSS unit scales with the root font size?`, choices:['px','em','rem','vh'], answer:2, explanation:'<code>rem</code> is relative to the root (html) font size; <code>em</code> is relative to the current element.'},
+      {id:'css_spec1', topic:'css', type:'mc', prompt:`Which has the highest specificity (most likely to win)?`, choices:['Type selector (e.g., <code>p</code>)','Class selector (e.g., <code>.note</code>)','ID selector (e.g., <code>#title</code>)','Universal selector (<code>*</code>)'], answer:2, explanation:'ID selectors outrank class and type selectors in specificity.'},
+      // EXTRA HTML/CSS + PYTHON to reach ~50
+      {id:'html_img3', difficulty:'easy', topic:'images', type:'mc', prompt:`Which sets a fixed image width of 200px?`, choices:[
+        '<code>&lt;img src="pic.jpg" style="width:200"&gt;</code>',
+        '<code>&lt;img src="pic.jpg" width="200"&gt;</code>',
+        '<code>&lt;img src="pic.jpg" w=200&gt;</code>',
+        '<code>&lt;img src="pic.jpg" width="200px" height:auto&gt;</code>'
+      ], answer:1, explanation:'The HTML <code>width</code> attribute expects a number of CSS pixels; CSS is also fine, but must include units.'},
+      {id:'html_link3', difficulty:'medium', topic:'links', type:'mc', prompt:`On <code>about.html</code>, which creates a link to another page in the same folder named <code>contact.html</code>?`, choices:[
+        '<code>&lt;a href="/contact.html"&gt;Contact&lt;/a&gt;</code>',
+        '<code>&lt;a href="contact.html"&gt;Contact&lt;/a&gt;</code>',
+        '<code>&lt;a href="./"&gt;Contact&lt;/a&gt;</code>',
+        '<code>&lt;a url="contact.html"&gt;Contact&lt;/a&gt;</code>'
+      ], answer:1, explanation:'A relative URL of <code>contact.html</code> points to a file in the same directory.'},
+      {id:'html_table3', difficulty:'medium', topic:'tables', type:'mc', prompt:`How do you make a header cell span two columns?`, choices:[
+        '<code>&lt;th merge="2"&gt;</code>',
+        '<code>&lt;th colspan="2"&gt;</code>',
+        '<code>&lt;td span="2"&gt;</code>',
+        '<code>&lt;th width="2"&gt;</code>'
+      ], answer:1, explanation:'Use <code>colspan</code> to span columns (and <code>rowspan</code> to span rows).'},
+      {id:'css_flex1', difficulty:'medium', topic:'css', type:'mc', prompt:`Which makes a container lay out children in a row by default?`, choices:[
+        '<code>display: flex;</code>',
+        '<code>display: block;</code>',
+        '<code>display: grid;</code>',
+        '<code>display: inline-block;</code>'
+      ], answer:0, explanation:'Flexbox defaults to row direction (<code>flex-direction: row</code>).'},
+      {id:'css_grid1', difficulty:'hard', topic:'css', type:'mc', prompt:`What does <code>grid-template-columns: repeat(3, 1fr);</code> do?`, choices:[
+        'Creates three equal-width columns',
+        'Creates one column repeated three rows',
+        'Creates columns of 1px, 1px, 1px',
+        'Sets the gap between columns to 1fr'
+      ], answer:0, explanation:'It defines three columns each taking one fraction of the available space.'},
+      {id:'css_inherit1', difficulty:'medium', topic:'css', type:'mc', prompt:`Which property typically <em>inherits</em> from its parent by default?`, choices:['margin','padding','color','width'], answer:2, explanation:'<code>color</code>, <code>font</code>, and some text-related properties inherit; layout properties like margin do not.'},
+      {id:'py_if4', difficulty:'hard', topic:'if', type:'mc', prompt:`What prints?<br><span class="mono">a = False or True and False
+print(a)</span>`, choices:['True','False','None','Error'], answer:1, explanation:'<code>and</code> has higher precedence than <code>or</code>, so it becomes <code>False or (True and False)</code> → <code>False or False</code> → False.'},
+      {id:'py_range1', difficulty:'medium', topic:'for', type:'mc', prompt:`How many numbers does <code>range(1, 6, 2)</code> produce?`, choices:['2','3','4','5'], answer:1, explanation:'It yields 1, 3, 5 → three numbers.'},
+      {id:'py_cast1', difficulty:'hard', topic:'types', type:'mc', prompt:`What is the result of <code>int("3.0")</code>?`, choices:['3','3.0','ValueError','TypeError'], answer:2, explanation:'<code>int("3.0")</code> raises <code>ValueError</code>; use <code>int(float("3.0"))</code> or <code>round</code> patterns carefully.'},
+      {id:'py_bool1', difficulty:'medium', topic:'operators', type:'mc', prompt:`Which expression evaluates to <em>True</em>?`, choices:[
+        '<span class="mono">(not True) or (0 == 1)</span>',
+        '<span class="mono">(10 % 2 == 0) and (True)</span>',
+        '<span class="mono">(3 &gt; 5) and (2 &gt; 1)</span>',
+        '<span class="mono">not (2 == 2)</span>'
+      ], answer:1, explanation:'Both parts are True so the whole expression is True.'}
+    
+    ];
+
+    // ---------- State ----------
+    let game = {
+      name: '',
+      period: '',
+      questions: [],
+      pointer: 0,
+      score: 0,
+      points: 0,
+      streak: 0,
+      answered: [], // {id, correct, pick, correctIndex, bonus, pointsAwarded, streakAfter}
+      startTime: 0,
+    };
+
+    // ---------- Rendering ----------
+    function show(id){
+      ['#screen-intro','#screen-game','#screen-end','#screen-preview'].forEach(sel=>$(sel).classList.add('hidden'));
+      $(id).classList.remove('hidden');
+    }
+
+    function startGame(){
+      const name = $('#studentName').value.trim();
+      const period = $('#classPeriod').value.trim();
+      if(!name){ alert('Please enter your name.'); return; }
+      const qc = $('#questionCount').value;
+      const diffSel = ($('#difficulty') && $('#difficulty').value) || 'all';
+      const catSel = ($('#category') && $('#category').value) || 'all';
+
+      const pythonTopics = ['variables','input','concatenation','if','for','while','operators','types','mixed'];
+      const webTopics = ['html','images','links','tables','css'];
+
+      // Normalize difficulties
+      const DIFF_MAP = {
+        var1:'easy', var2:'easy', inp1:'easy', con1:'easy', con2:'medium', inp2:'medium',
+        if1:'medium', if2:'easy', if3:'easy', for1:'easy', for2:'medium', while1:'medium', while2:'easy',
+        op1:'easy', op2:'hard', op3:'medium', type1:'easy', type2:'easy', type3:'medium',
+        mix1:'easy', mix2:'medium', mix3:'easy', mix4:'easy',
+        html_p1:'easy', html_p2:'easy', html_img1:'easy', html_img2:'easy', html_a1:'easy', html_a2:'medium',
+        html_table1:'medium', html_table2:'medium', css_sel1:'easy', css_sel2:'easy', css_link1:'easy', css_rule1:'easy',
+        css_box1:'medium', css_disp1:'easy', css_color1:'medium', css_units1:'medium', css_spec1:'hard',
+        html_img3:'easy', html_link3:'medium', html_table3:'medium', css_flex1:'medium', css_grid1:'hard', css_inherit1:'medium',
+        py_if4:'hard', py_range1:'medium', py_cast1:'hard', py_bool1:'medium'
+      };
+
+      let pool = BANK.map(q=> ({...q, difficulty: q.difficulty || DIFF_MAP[q.id] || (webTopics.includes(q.topic)? 'easy' : 'medium')}));
+
+      if(diffSel !== 'all') pool = pool.filter(q => q.difficulty === diffSel);
+      if(catSel === 'python') pool = pool.filter(q => pythonTopics.includes(q.topic));
+      if(catSel === 'web') pool = pool.filter(q => webTopics.includes(q.topic));
+
+      shuffle(pool);
+      if(qc !== 'all') pool = pool.slice(0, parseInt(qc));
+
+      game = { name, period, questions: pool, pointer:0, score:0, points:0, streak:0, answered:[], startTime:Date.now() };
+
+      $('#uiName').textContent = name;
+      $('#uiTotal').textContent = pool.length;
+
+      show('#screen-game');
+      renderQuestion();
+    }
+
+    function renderQuestion(){
+      const q = game.questions[game.pointer];
+      $('#uiIndex').textContent = game.pointer + 1;
+      $('#uiTopic').textContent = q.topic;
+      $('#uiBar').style.width = ((game.pointer)/game.questions.length*100).toFixed(1)+'%';
+      $('#uiScore').textContent = game.score;
+      $('#uiPoints').textContent = game.points;
+      $('#uiStreak').textContent = game.streak;
+
+      $('#uiQuestion').innerHTML = q.prompt;
+      $('#uiExplain').classList.add('hidden');
+      $('#uiExplain').innerHTML = '';
+
+      const letters = ['A','B','C','D','E','F'];
+      const indices = q.choices.map((_,i)=>i);
+      shuffle(indices);
+
+      const fragment = document.createDocumentFragment();
+      indices.forEach((idx,i)=>{
+        const choice = document.createElement('div');
+        choice.className = 'choice';
+        choice.dataset.index = idx;
+        choice.innerHTML = html`<div class="letter">${letters[i]}</div><div>${q.choices[idx]}</div>`;
+        choice.addEventListener('click', ()=>pick(idx));
+        fragment.appendChild(choice);
+      });
+      const cont = $('#uiChoices');
+      cont.innerHTML='';
+      cont.appendChild(fragment);
+    }</div><div>${q.choices[idx]}</div>`;
+        choice.addEventListener('click', ()=>pick(idx));
+        fragment.appendChild(choice);
+      });
+      const cont = $('#uiChoices');
+      cont.innerHTML='';
+      cont.appendChild(fragment);
+    }
+
+    function pick(idx){
+      // Prevent double answers
+      if($$('.choice.disabled').length) return;
+      const q = game.questions[game.pointer];
+      const correct = (idx === q.answer);
+
+      let bonus = 0;
+      let awarded = 0;
+      if(correct){
+        game.score++;
+        game.streak = (game.streak || 0) + 1;
+        bonus = Math.min(Math.max(game.streak - 1, 0), 3); // 0 for first, up to +3
+        awarded = 1 + bonus;
+        game.points += awarded;
+      } else {
+        game.streak = 0;
+      }
+
+      // mark choices
+      $$('.choice').forEach(el=>{
+        const i = parseInt(el.dataset.index,10);
+        el.classList.add('disabled');
+        if(i === q.answer) el.classList.add('correct');
+        if(i === idx && !correct) el.classList.add('incorrect');
+      });
+
+      // explanation
+      const ex = $('#uiExplain');
+      ex.classList.remove('hidden');
+      if(correct){
+        ex.innerHTML = `✅ Correct. +${awarded} point${awarded!==1?'s':''} (streak ${game.streak}, bonus +${bonus}). ` + q.explanation;
+      } else {
+        ex.innerHTML = '❌ Incorrect. Streak reset. ' + q.explanation;
+      }
+
+      $('#uiScore').textContent = game.score;
+      $('#uiPoints').textContent = game.points;
+      $('#uiStreak').textContent = game.streak;
+
+      game.answered.push({ id:q.id, topic:q.topic, correct, pick:idx, correctIndex:q.answer, bonus, pointsAwarded:awarded, streakAfter:game.streak });
+    });
+
+      // explanation
+      const ex = $('#uiExplain');
+      ex.classList.remove('hidden');
+      ex.innerHTML = (correct? '✅ Correct. ':'❌ Incorrect. ') + q.explanation;
+
+      game.answered.push({ id:q.id, topic:q.topic, correct, pick:idx, correctIndex:q.answer });
+    }
+
+    function next(){
+      if(game.pointer < game.questions.length - 1){
+        game.pointer++;
+        renderQuestion();
+      } else {
+        endGame();
+      }
+    }
+
+    function skip(){
+      // Record skip as incorrect without penalty? We'll record but not change score.
+      const q = game.questions[game.pointer];
+      if(!game.answered.find(a=>a.id===q.id)){
+        game.answered.push({ id:q.id, topic:q.topic, correct:false, pick:null, correctIndex:q.answer, skipped:true });
+      }
+      next();
+    }
+
+    function endGame(){
+      const total = game.questions.length;
+      const correct = game.score;
+      const percent = Math.round((correct/total)*100);
+
+      $('#rName').textContent = game.name;
+      $('#rPeriod').textContent = game.period || '-';
+      $('#rScore').textContent = `${correct} / ${total}`;
+      $('#rPercent').textContent = `${percent}%`;
+      if($('#rPoints')) $('#rPoints').textContent = game.points;
+
+      // List missed questions
+      const missed = game.answered.filter(a=>!a.correct);
+      const box = $('#missedContainer');
+      box.innerHTML = missed.length ? '<h3>Missed or Skipped Questions</h3>' : '<h3>Nice! No misses 🎉</h3>';
+      missed.forEach((a,idx)=>{
+        const q = game.questions.find(qq=>qq.id===a.id);
+        const div = document.createElement('div');
+        div.className='explain';
+        div.innerHTML = html`<div class="small muted">${idx+1}. Topic: <span class="tag">${q.topic}</span></div>
+        <div style="margin:6px 0" class="question">${q.prompt}</div>
+        <div class="small">Your answer: <span class="mono">${a.pick==null? '(skipped)': stripHTML(q.choices[a.pick])}</span></div>
+        <div class="small">Correct: <span class="mono">${stripHTML(q.choices[q.answer])}</span></div>
+        <div class="small" style="margin-top:6px">Why: ${q.explanation}</div>`;
+        box.appendChild(div);
+      });
+
+      show('#screen-end');
+    } / ${total}`;
+      $('#rPercent').textContent = `${percent}%`;
+
+      // List missed questions
+      const missed = game.answered.filter(a=>!a.correct);
+      const box = $('#missedContainer');
+      box.innerHTML = missed.length ? '<h3>Missed or Skipped Questions</h3>' : '<h3>Nice! No misses 🎉</h3>';
+      missed.forEach((a,idx)=>{
+        const q = game.questions.find(qq=>qq.id===a.id);
+        const div = document.createElement('div');
+        div.className='explain';
+        div.innerHTML = html`<div class="small muted">${idx+1}. Topic: <span class="tag">${q.topic}</span></div>
+        <div style="margin:6px 0" class="question">${q.prompt}</div>
+        <div class="small">Your answer: <span class="mono">${a.pick==null? '(skipped)': stripHTML(q.choices[a.pick])}</span></div>
+        <div class="small">Correct: <span class="mono">${stripHTML(q.choices[q.answer])}</span></div>
+        <div class="small" style="margin-top:6px">Why: ${q.explanation}</div>`;
+        box.appendChild(div);
+      });
+
+      show('#screen-end');
+    }
+
+    function stripHTML(s){
+      const tmp = document.createElement('div');
+      tmp.innerHTML = s; return tmp.textContent || tmp.innerText || '';
+    }
+
+    function downloadCSV(){
+      const headers = ['timestamp','name','period','total','correct','points','percent','q_index','q_id','topic','picked','correct_index','points_awarded','streak_after'];
+      const total = game.questions.length;
+      const percent = Math.round((game.score/total)*100);
+      const rows = [];
+      const ts = new Date().toISOString();
+
+      game.answered.forEach((a, i)=>{
+        rows.push([
+          ts,
+          game.name,
+          game.period || '',
+          total,
+          game.score,
+          game.points,
+          percent,
+          i+1,
+          a.id,
+          a.topic,
+          a.pick==null? 'skipped' : a.pick,
+          a.correctIndex,
+          a.pointsAwarded || 0,
+          a.streakAfter || 0
+        ].join(','))
+      })
+
+      if(rows.length===0){
+        rows.push([ts, game.name, game.period||'', total, game.score, game.points, percent, '', '', '', '', '', '', ''].join(','));
+      }
+
+      const data = [headers.join(','), ...rows].join('
+');
+      const blob = new Blob([data], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeName = game.name.replace(/[^a-z0-9]+/ig,'_').replace(/^_|_$/g,'');
+      a.download = `python_web_review_${safeName || 'student'}_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    })
+
+      // If a student never clicked (rare), still produce one summary row
+      if(rows.length===0){
+        rows.push([ts, game.name, game.period||'', total, game.score, percent, '', '', '', '', ''].join(','));
+      }
+
+      const data = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([data], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeName = game.name.replace(/[^a-z0-9]+/ig,'_').replace(/^_|_$/g,'');
+      a.download = `python_review_${safeName || 'student'}_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // ---------- Preview (for teacher) ----------
+    function renderPreview(){
+      const list = $('#previewList');
+      list.innerHTML = '';
+      BANK.forEach((q,idx)=>{
+        const card = document.createElement('div');
+        card.className='explain';
+        card.innerHTML = html`<div class="small muted">#${idx+1} • <span class="tag">${q.topic}</span> • <span class="tag">${q.difficulty || 'medium'}</span> • id=<span class="mono">${q.id}</span></div>`
+        <div class="question" style="margin:6px 0">${q.prompt}</div>
+        <ul class="small" style="margin:6px 0 0 16px">${q.choices.map((c,i)=>`<li>${i===q.answer? '✅':'▫️'} ${c}</li>`).join('')}</ul>
+        <div class="small" style="margin-top:6px">Why: ${q.explanation}</div>`;
+        list.appendChild(card);
+      })
+    }
+
+    // ---------- Events ----------
+    $('#btnStart').addEventListener('click', startGame);
+    $('#btnPreview').addEventListener('click', ()=>{ renderPreview(); show('#screen-preview'); });
+    $('#btnBackHome').addEventListener('click', ()=> show('#screen-intro'));
+
+    $('#btnNext').addEventListener('click', next);
+    $('#btnSkip').addEventListener('click', skip);
+    $('#btnEnd').addEventListener('click', endGame);
+
+    $('#btnRetry').addEventListener('click', ()=>{ show('#screen-intro') });
+    $('#btnDownload').addEventListener('click', downloadCSV);
+    $('#btnReview').addEventListener('click', ()=>{
+      // Reveal explanations for all (on end screen already shown), nothing extra needed.
+      alert('Scroll to review the missed questions below.');
+    });
+  </script>
+</body>
+</html>
